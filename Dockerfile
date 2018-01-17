@@ -28,7 +28,7 @@ RUN apk add --no-cache php5-dev php5-openssl php5-pear \
     php5-bcmath \
     php5-mcrypt php5-curl php5-json \
     php5-opcache php5-ctype \
-    php5-xsl php5-ldap \
+    php5-xsl php5-ldap php5-xml\
     php5-intl php5-dom php5-xmlreader \
     php5-pcntl php5-posix php5-apcu \
     php5-pdo php5-pdo_mysql php5-mysql php5-mysqli \
