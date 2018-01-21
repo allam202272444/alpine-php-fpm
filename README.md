@@ -1,4 +1,4 @@
-# PHP-FPM image for LAMP stack
+# PHP-FPM image for Docker Compose LAMP stack
 PHP-5 FPM image based on the last Alpine Linux **PHP** packages(**php-5.6.***).
 
 ## Main Built features
@@ -97,4 +97,4 @@ You could check work with the command:
 
 ## Full LAMP stack
 
-See [docker-compose-lamp](https://github.com/a-kom/docker-compose-lamp)
+See [Docker Compose LAMP](https://github.com/a-kom/docker-compose-lamp).
