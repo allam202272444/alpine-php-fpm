@@ -1,5 +1,5 @@
-#lordius/alpine-php_fpm
-FROM lordius/alpine-base:edge
+# lordius/alpine-php_fpm
+FROM lordius/alpine-base:v3.5
 LABEL maintainer=andriy.khomych@gmail.com
 # Envs
 ENV XDEBUG_VERSION 2.6.0
@@ -25,18 +25,21 @@ RUN apk add --no-cache php7-fpm
 RUN apk add --no-cache php7-dev php7-openssl \
     php7-common php7-ftp php7-gd \
     php7-dom  php7-sockets \
-    php7-zlib php7-bz2 php7-pear php7-cli \
+    php7-zlib php7-bz2 php7-pear \
     php7-exif php7-phar php7-zip php7-calendar \
     php7-iconv php7-imap php7-soap \
     php7-mbstring php7-bcmath \
     php7-mcrypt php7-curl php7-json \
     php7-opcache php7-ctype php7-xml \
-    php7-xsl php7-ldap php7-xmlwriter php7-xmlreader \
-    php7-intl php7-tokenizer php7-session  \
-    php7-pcntl php7-posix php7-apcu php7-simplexml \
+    php7-xsl php7-ldap php7-xmlreader \
+    php7-intl php7-session  \
+    php7-pcntl php7-posix php7-apcu \
     php7-pdo \
     php7-mysqlnd php7-pdo_mysql php7-mysqli \
     php7-pgsql php7-pdo_pgsql  
+
+# Add php symlink
+RUN ln -s /usr/bin/php7 /usr/bin/php
 # Copy crontab file for use later
 COPY crontasks.txt /home
 #RUN crontab /home/crontasks.txt
@@ -47,14 +50,6 @@ RUN echo "relayhost = [$PHP_SENDMAIL_HOST]:$PHP_SENDMAIL_PORT" >> /etc/postfix/m
     echo "inet_interfaces = all" >> /etc/postfix/main.cf && \
     echo "recipient_delimiter = +" >> /etc/postfix/main.cf
 
-# Install uploadprogress
-RUN cd /temp_docker && git clone https://github.com/php/pecl-php-uploadprogress.git && cd pecl-php-uploadprogress && \
-    phpize && \
-    ./configure && \
-    make && \
-    make install && \
-    echo 'extension=uploadprogress.so' > /etc/php7/conf.d/uploadprogress.ini
-
 # Install imagemagick
 RUN sed -ie 's/-n//g' /usr/bin/pecl && \
     yes | pecl install imagick && \
@@ -62,15 +57,11 @@ RUN sed -ie 's/-n//g' /usr/bin/pecl && \
     rm -rf /tmp/pear
 
 # Install xdebug
-RUN mkdir /var/xdebug && chmod -R +x /var/xdebug
-RUN cd /temp_docker && wget https://xdebug.org/files/xdebug-$XDEBUG_VERSION.tgz
-RUN cd /temp_docker && tar -xvzf xdebug-$XDEBUG_VERSION.tgz
-RUN cd /temp_docker && cd xdebug-$XDEBUG_VERSION && phpize
-RUN cd /temp_docker && cd xdebug-$XDEBUG_VERSION && ./configure
-RUN cd /temp_docker && cd xdebug-$XDEBUG_VERSION && make
-RUN cd /temp_docker && cd xdebug-$XDEBUG_VERSION && make test
-RUN cd /temp_docker && cd xdebug-$XDEBUG_VERSION && echo ";zend_extension = xdebug.so" > /etc/php7/conf.d/xdebug.ini
-RUN cp /temp_docker/xdebug-$XDEBUG_VERSION/modules/xdebug.so /usr/lib/php7/modules/xdebug.so
+RUN sed -ie 's/-n//g' /usr/bin/pecl && \
+    yes | pecl install xdebug && \
+    echo 'extension=xdebug.so' > /etc/php7/conf.d/xdebug.ini && \
+    rm -rf /tmp/pear
+RUN echo ";zend_extension = xdebug.so" > /etc/php7/conf.d/xdebug.ini
 RUN sed -i \
     -e "$ a xdebug.default_enable = 0" \
     -e "$ a xdebug.remote_enable = 1" \
@@ -83,24 +74,6 @@ RUN sed -i \
     -e "$ a xdebug.profiler_enable_trigger = 1" \    
     -e "$ a xdebug.profiler_output_dir = /var/xdebug" \        
     /etc/php7/conf.d/xdebug.ini
-
-# Install memcached
-RUN cd /temp_docker && git clone https://github.com/php-memcached-dev/php-memcached && \
-    cd php-memcached && git checkout php7 && git pull && \
-    phpize && \
-    ./configure --with-libmemcached-dir=no --disable-memcached-sasl && \
-    make && \
-    make install && \
-    echo 'extension=memcached.so' > /etc/php7/conf.d/memcached.ini
-
-# Install php-redis
-RUN cd /temp_docker && git clone https://github.com/phpredis/phpredis.git && cd phpredis && \
-    git checkout php7-ipv6 && git pull && \
-    phpize  && \
-    ./configure  && \
-    make && \
-    make install && \
-    echo 'extension=redis.so' > /etc/php7/conf.d/redis.ini
 
 # Install MongoDB PHP extension
 RUN sed -ie 's/-n//g' /usr/bin/pecl && \
