@@ -50,12 +50,6 @@ RUN echo "relayhost = [$PHP_SENDMAIL_HOST]:$PHP_SENDMAIL_PORT" >> /etc/postfix/m
     echo "inet_interfaces = all" >> /etc/postfix/main.cf && \
     echo "recipient_delimiter = +" >> /etc/postfix/main.cf
 
-# Install imagemagick
-RUN sed -ie 's/-n//g' /usr/bin/pecl && \
-    yes | pecl install imagick && \
-    echo 'extension=imagick.so' > /etc/php7/conf.d/imagick.ini && \
-    rm -rf /tmp/pear
-
 # Install xdebug
 RUN sed -ie 's/-n//g' /usr/bin/pecl && \
     yes | pecl install xdebug && \
